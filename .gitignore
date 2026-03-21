@@ -1,0 +1,12 @@
+# .gitignore
+settings.ini
+venv/
+__pycache__/
+*.pyc
+db.sqlite3
+staticfiles/
+
+.pytest_cache/
+*.egg-info/
+dist/
+build/
