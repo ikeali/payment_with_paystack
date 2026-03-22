@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import dj_database_url
+from datetime import timedelta
 from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,11 +75,22 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
+
+    # ── RATE LIMITING 
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',    # unauthenticated users
+        'rest_framework.throttling.UserRateThrottle',    # authenticated users
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/hour',       # unauthenticated - 20 requests per hour
+        'user': '200/hour',      # authenticated - 200 requests per hour
+        'auth': '10/hour',       # login/register - 10 attempts per hour
+        'payment': '50/hour',    # payment endpoints - 50 requests per hour
+    }
 }
 
 
 # ── JWT ───────────────────────────────────────
-from datetime import timedelta
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
@@ -132,14 +144,40 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': config('ENGINE'),
-            'NAME': config('DB_NAME'),
-            'USER': config('DB_USER'),
-            'PASSWORD': config('DB_PASSWORD'),
-            'HOST': config('DB_HOST'),
-            'PORT': config('DB_PORT'),
+            'NAME': config('NAME'),
+            'USER': config('USER'),
+            'PASSWORD': config('PASSWORD'),
+            'HOST': config('HOST'),
+            'PORT': config('PORT'),
         }
     }
 
+
+
+REDIS_URL = config('REDIS_URL', default=None)
+
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT': 5,
+                'IGNORE_EXCEPTIONS': True,
+            },
+            'KEY_PREFIX': 'invoice_api',
+            'TIMEOUT': 60 * 15,
+        }
+    }
+else:
+    # fallback to local memory cache when Redis is not available
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 

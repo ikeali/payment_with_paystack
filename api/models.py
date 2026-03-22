@@ -40,6 +40,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['email']),
+        ]
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
@@ -49,6 +53,12 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),        
+            models.Index(fields=['created_at']), 
+        ]
 
 
 class Order(models.Model):
@@ -66,6 +76,13 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user']),       
+            models.Index(fields=['created_at']),  
+        ]
 
     def __str__(self):
         return f"Order {self.pk} by {self.user.username} - {self.status}"
@@ -85,6 +102,12 @@ class Payment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     paid_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['reference']),
+            models.Index(fields=['status']),              
+        ]
 
     def __str__(self):
         return f"Payment {self.reference} - {self.status}"

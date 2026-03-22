@@ -15,14 +15,18 @@ from .serializers import (
 )
 from .services.auth_service import register_user
 from .services.order_service import create_order, get_user_orders, get_order_by_id
-from .services.payment_service import initiate_payment, verify_payment, verify_paystack_webhook, handle_webhook_event
+from .services.payment_service import initiate_payment, verify_payment, handle_webhook_event, verify_paystack_webhook
 import json
+from .throttles import AuthRateThrottle, PaymentRateThrottle
+
 
 
 
 # AUTH
 class RegisterView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [AuthRateThrottle]  # ← 10 requests per hour
+
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -37,6 +41,8 @@ class RegisterView(APIView):
 
 class EmailTokenObtainPairView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [AuthRateThrottle]  # ← 10 requests per hour
+
 
     def post(self, request):
         serializer = EmailTokenObtainPairSerializer(data=request.data)
@@ -93,6 +99,8 @@ class OrderDetailView(APIView):
 # PAYMENTS 
 class InitiatePaymentView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [PaymentRateThrottle]  # ← 50 requests per hour
+
 
     def post(self, request, order_id):
         order = get_order_by_id(order_id, request.user)
@@ -114,6 +122,8 @@ class InitiatePaymentView(APIView):
 
 class VerifyPaymentView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [PaymentRateThrottle]  # ← 50 requests per hour
+
 
     def get(self, request, reference):
         payment, error = verify_payment(reference)
@@ -165,3 +175,5 @@ class PaystackWebhookView(APIView):
         handle_webhook_event(event, data)
 
         return Response({'message': 'Webhook received.'}, status=status.HTTP_200_OK)
+
+

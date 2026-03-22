@@ -8,7 +8,9 @@ from .views import (
     OrderDetailView,
     InitiatePaymentView,
     VerifyPaymentView, PaystackCallbackView, PaystackWebhookView
+
 )
+
 
 
 urlpatterns = [
@@ -31,5 +33,7 @@ urlpatterns = [
 
     path('payments/callback/', PaystackCallbackView.as_view(), name='paystack-callback'),
     path('payments/webhook/', PaystackWebhookView.as_view(), name='paystack-webhook'),  # add this
+
+
 
 ]
