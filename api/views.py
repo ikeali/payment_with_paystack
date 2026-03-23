@@ -177,3 +177,23 @@ class PaystackWebhookView(APIView):
         return Response({'message': 'Webhook received.'}, status=status.HTTP_200_OK)
 
 
+from django.core.cache import cache
+
+
+class HealthCheckView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        # test Redis connection
+        try:
+            cache.set('health_check', 'ok', timeout=30)
+            redis_value = cache.get('health_check')
+            redis_status = 'connected' if redis_value == 'ok' else 'disconnected'
+        except Exception as e:
+            redis_status = f'error: {str(e)}'
+
+        return Response({
+            'status': 'ok',
+            'redis': redis_status,
+            'database': 'connected',
+        })

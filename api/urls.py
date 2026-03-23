@@ -10,6 +10,8 @@ from .views import (
     VerifyPaymentView, PaystackCallbackView, PaystackWebhookView
 
 )
+from .views import HealthCheckView
+
 
 
 
@@ -33,6 +35,9 @@ urlpatterns = [
 
     path('payments/callback/', PaystackCallbackView.as_view(), name='paystack-callback'),
     path('payments/webhook/', PaystackWebhookView.as_view(), name='paystack-webhook'),  # add this
+
+    path('health/', HealthCheckView.as_view(), name='health-check'),
+
 
 
 
