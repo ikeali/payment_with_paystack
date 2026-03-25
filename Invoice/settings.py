@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',        # ← must be here
     'rest_framework',
     'rest_framework_simplejwt',
 
@@ -79,7 +80,7 @@ AUTH_USER_MODEL = 'api.User'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-
+    'corsheaders.middleware.CorsMiddleware',  # ← must be here
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
